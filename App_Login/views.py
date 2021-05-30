@@ -2,12 +2,13 @@ from django.shortcuts import render, HttpResponseRedirect
 from App_Login.forms import CreateNewUser, EditProfile
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse, reverse_lazy
-from App_Login.models import UserProfile
+from App_Login.models import UserProfile, Follow
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 
 from App_Posts.forms import PostForm
 
+from django.contrib.auth.models import User
 # Create your views here.
 
 def sign_up(request):
@@ -65,3 +66,31 @@ def profile(request):
             post.save()
             return HttpResponseRedirect(reverse('home'))
     return render(request, 'App_Login/user.html', context={'title':'User', 'form':form})
+
+
+@login_required
+def user(request, username):
+    user_other = User.objects.get(username=username)
+    alread_followed = Follow.objects.filter(follower=request.user, following=user_other)
+    if user_other == request.user:
+        return HttpResponseRedirect(reverse('App_Login:profile'))
+    return render(request, 'App_Login/user_other.html', context={'user_other':user_other, 'alread_followed':alread_followed})
+
+
+@login_required
+def follow(request, username):
+    following_user = User.objects.get(username=username)
+    follower_user = request.user
+    alread_followed = Follow.objects.filter(follower=follower_user, following=following_user)
+    if not alread_followed:
+        followed_user = Follow(follower=follower_user, following=following_user)
+        followed_user.save()
+    return HttpResponseRedirect(reverse('App_Login:user', kwargs={'username':username}))
+
+@login_required
+def unfollow(request, username):
+    following_user = User.objects.get(username=username)
+    follower_user = request.user
+    alread_followed = Follow.objects.filter(follower=follower_user, following=following_user)
+    alread_followed.delete()
+    return HttpResponseRedirect(reverse('App_Login:user', kwargs={'username':username}))

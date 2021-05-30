@@ -24,7 +24,13 @@
       <ul class="navbar-nav">
         <li class="nav-item active">
           <a class="nav-link" href="{% url 'App_Posts:home' %}">Home</a>
-        </li>
+        </li> &nbsp; &nbsp; &nbsp; &nbsp;
+
+        <form class="form-inline" method="GET">
+          <input class="form-control mr-sm-2" type="text" name="search" placeholder="Search">
+          <button type="submit" class="btn btn-success">Search</button>
+        </form>
+
         <li class="nav-item">
           <a class="nav-link" href="{% url 'App_Login:logout' %}">Logout</a>
         </li>
